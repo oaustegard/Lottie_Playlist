@@ -1,0 +1,11 @@
+name: Epic issues for GitHub
+  # You may pin to the exact commit or the version.
+  # uses: cloudaper/epics-action@17744978a1417e1544b89a1d2ea9284465223ee0
+  uses: cloudaper/epics-action@v1.1.4
+  with:
+    # GitHub token secret
+    github-token: 
+    # Label name for epic issues
+    epic-label-name: # default is epic
+    # Auto close epic when all referenced issues are closed
+    auto-close-epic: # optional
