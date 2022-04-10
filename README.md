@@ -30,10 +30,10 @@
    1. ✅ Securely store credentials locally
    1. 👷 Example code - WIP
 1. ✅ Extract color(s) from image -- medium, use ColorThief, adjust for use-case
-    1. 🔳 Example code
+    1. ✅ Example code
 1. ✅ Color sorting algorithm -- custom
     1. ✅ Example code
-1. 🔳 Empirical testing, Lottie UAT 
+1. ✅ Empirical testing, Lottie UAT 
 1. 🔳 Pithy writeup tt time consuming
 1. 🔳 Port to Google Colab for hosting  easy? 🤞
    1. 🔳 Securely store credentials in Colab — easy? -- https://github.com/apolitical/colab-env
