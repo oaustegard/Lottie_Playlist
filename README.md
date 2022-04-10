@@ -24,15 +24,19 @@
 
 
 ### Things to figure out/do
-🤞1. ✅ Spotify Python library to accelerate development -- easy, Spotipy
-1. 🔳 Spotify OAuth/library login mechanism - annoyingly harder
+1. ✅ Spotify APIs for getting and putting playlist, along with track/album info - easy
+1. ✅ Spotify Python library to accelerate development — easy, Spotipy
+1. 🔳 Spotify OAuth/library login mechanism -- annoyingly harder
    1. ✅ Securely store credentials locally
-   1. 🔳 Example code
-1. ✅ Extract color(s) from image - medium, use ColorThief, adjust for use-case
+   1. 👷 Example code - WIP
+1. ✅ Extract color(s) from image -- medium, use ColorThief, adjust for use-case
     1. 🔳 Example code
 1. ✅ Color sorting algorithm -- custom
     1. ✅ Example code
-1. 🔳 Empirical testing, Lottie UAT
+1. 🔳 Empirical testing, Lottie UAT 
 1. 🔳 Pithy writeup tt time consuming
-1. 🔳 Port to Google Colab for hosting -- easy? 🤞
-   1. 🔳 Securely store credentials in Colab -- easy? -- https://github.com/apolitical/colab-env
+1. 🔳 Port to Google Colab for hosting  easy? 🤞
+   1. 🔳 Securely store credentials in Colab — easy? -- https://github.com/apolitical/colab-env
+—
+-
+–
