@@ -63,7 +63,7 @@ def perceived_brightness(rgb:tuple) -> float:
     Will return a value in the same [0, N] range as the input tuple
     """
     r, g, b = rgb
-    return math.sqrt(0.299 * r * r + 0.587 * g * g + 0.114 * b * b)
+    return (0.299 * r * r + 0.587 * g * g + 0.114 * b * b)**0.5
 
 def enrich_color(rgb:tuple) -> tuple:
     """

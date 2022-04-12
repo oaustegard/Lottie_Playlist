@@ -242,11 +242,11 @@ def sort_and_render_colors(df:pd.DataFrame, lightness_column:str)-> pd.DataFrame
 # by the various lightness formulae
 
 # %%
-rgbs = generate_random_colors(200)
+rgbs = generate_random_colors(400)
 # enrich the tuples THEN generate the dataframe - this would likely be faster to do as vectorized functions in 
 # the dataframe conversion process but favoring simplicity over performance here
 enriched_colors = [enrich_color(rgb) for rgb in rgbs]
-cdf = generate_color_df(enriched_colors, partition_degrees=30)
+cdf = generate_color_df(enriched_colors, partition_degrees=40)
 
 # generate the HTML table
 ht = \

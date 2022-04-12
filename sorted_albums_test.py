@@ -1,10 +1,9 @@
 # %% Get the albums from the test_covers folder
 import os
 from typing import Tuple
-from IPython.display import display, HTML, Image
+import webbrowser
 from colorthief import ColorThief
-from numpy import partition
-from color_utility import perceived_brightness, perceived_brightness_255, vividity
+from color_utility import vividity
 import pandas as pd
 
 #%%
@@ -77,7 +76,7 @@ def rgb_to_hue_luminance_brightness(rgb:tuple)->Tuple[float, float, float]:
     return h, lum, pb
 #end def
 
-def sort_and_render_images(df:pd.DataFrame, color:str, hue_column: str, lightness_column:str)-> pd.DataFrame:
+def sort_and_render_images(df:pd.DataFrame, hue_column: str, lightness_column:str)-> pd.DataFrame:
     """
     Sort the the dataframe by the chosen hue partition and lightness column then render the images
     """
@@ -121,7 +120,7 @@ for image in image_list:
 # are also closer to red than violet, so shift the hue to capture these as 'red'
 hue_shift = 30
 # partition the hue into 360/partition_degrees bands
-partition_degrees = 60
+partition_degrees = 40
 # get the hue partition for both the prime and vivid colors
 df['prime_hue_part'] = ((df['prime_hue'] + hue_shift) % 360) // partition_degrees
 df['vivid_hue_part'] = ((df['vivid_hue'] + hue_shift) % 360) // partition_degrees
@@ -130,24 +129,23 @@ df['vivid_hue_part'] = ((df['vivid_hue'] + hue_shift) % 360) // partition_degree
 # %%
 # generate the HTML table
 ht = \
-f'''<style>img {{max-height: 50px; display:block;}}</style>
+f'''<style>img {{max-width: 70px; display:block;}} td {{padding: 30px;}}</style>
 <table>
     <tr><th>Vivid/Lum</th><th>Vivid/PB</th>
         <th>Viv hue/Prim Lum</th><th>Viv hue/Prim PB</th></tr>
     <tr>
-        <td>{sort_and_render_images(df, "vivid_color", "vivid_hue_part", "vivid_lum")}</td>
-        <td>{sort_and_render_images(df, "vivid_color", "vivid_hue_part", "vivid_pb")}</td>
-        <td>{sort_and_render_images(df, "vivid_color", "vivid_hue_part", "prime_lum")}</td>
-        <td>{sort_and_render_images(df, "vivid_color", "vivid_hue_part", "prime_pb")}</td>
+        <td>{sort_and_render_images(df, "vivid_hue_part", "vivid_lum")}</td>
+        <td>{sort_and_render_images(df, "vivid_hue_part", "vivid_pb")}</td>
+        <td>{sort_and_render_images(df, "vivid_hue_part", "prime_lum")}</td>
+        <td>{sort_and_render_images(df, "vivid_hue_part", "prime_pb")}</td>
     </tr>
 </table>'''
 
-print(ht)
-
-#display(HTML(ht))
-#<th>Prime/Lum</th><th>Prime/PB</th>
-#        <td>{sort_and_render_images(df, "prime_color", "prime_hue", "prime_lum")}</td>
-#        <td>{sort_and_render_images(df, "prime_color", "prime_hue", "prime_pb")}</td>
-
+# output the HTML to a file
+with open('sorted_albums_test.html', 'w') as f:
+    f.write(ht)
+#end with
+# open the file in the browser
+webbrowser.open('file://' + os.path.realpath('sorted_albums_test.html'))
 
 # %%
