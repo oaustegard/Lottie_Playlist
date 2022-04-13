@@ -1,9 +1,11 @@
 # %% Get the albums from the test_covers folder
 import os
+from IPython.display import display
 from typing import Tuple
 import webbrowser
 import pandas as pd
 from PIL import Image
+import pprint
 
 #%%
 
@@ -58,9 +60,10 @@ def rgb_to_hsp(rgb:tuple)->Tuple[int, float, float]:
 #end def
 
 def is_vivid(s:float, p:float)->bool:
-    """Determine if a color is 'vivid' based on the saturation and perceived brightness
-    Vivid thresholds based on empirical eyeballing of colors using the online tool at
-    https://jsfiddle.net/austegard/g1yobd4h/
+    """Determine if a color is 'vivid' based on the saturation and perceived brightness.
+    Vivid thresholds based on the super-scientific approach of one person empirically 
+    eyeballing colors of various saturation and brightnesss on an uncalibrated monitor, 
+    using his own created online tool at https://jsfiddle.net/austegard/g1yobd4h/
     :param s: saturation
     :param p: perceived brightness
     :return: True if the color is 'vivid'"""
@@ -70,16 +73,17 @@ def is_vivid(s:float, p:float)->bool:
 
 def get_rainbow_band(hue:float, band_deg:int)->int:
     """
-    Get the "rainbow" band for a hue
+    Get the "rainbow" band for a hue by dividing the hue color wheel into band_deg-sized partitions.
+    Since the last 30º of the hue appears to this developer as more red than violet, 
+    shift the hue wheel by 30º so they appear with the other reds at the beginning of the wheel 
     for rainbow like color bands
     :param hue: hue in [0, 360]-space
     :param band_size: size of the rainbow band partition in degrees
     :return: the rainbow band index
     """
-
-    # divide the hue 360º into band_deg sized bands. "Correct" for the fact that colors in the 
-    # 330º-360º space appear more red than purple, so move those to the other side of the spectrum
+    # apply the 30º shift
     rb_hue = (hue + 30) % 360
+    # return the band index
     return rb_hue // band_deg
 
 
@@ -115,26 +119,30 @@ def get_image_rainbow_bands_and_perceived_brightness(image:Image, band_deg:int)-
         if is_vivid(s, p):
             vb = get_rainbow_band(h, band_deg)
             # ... and increment the band value by the perceived brightness of the color
-            #TODO should this be just += 1, += s or += p?  Should all colors contribute equally to define the ranking of the bands?
-            vivid_bands[vb] += p  
+            #TODO should this be just += 1, += s or += p? Should all colors contribute 
+            # equally to define the ranking of the bands? 
+            vivid_bands[vb] += s  
             vivid_pixels += 1
         #end if
     #end for
     
     # get the bands to use (presumably this will normally be the vivid bands)
-    bands, band_pixels = (vivid_bands, vivid_pixels) if sum(vivid_bands.values()) == 0 else (all_bands, len(pixels))
+    if sum(vivid_bands.values()) > 0:
+        bands = vivid_bands
+        band_pixels = vivid_pixels
+    else:
+        bands = all_bands
+        band_pixels = len(pixels)
     
-    # normalize by dividing each value by the respective number of pixels to get [0,1]-space values
-    # if 
-    #TODO is this actually necessary? And if so should we use numpy instead of dictionary comprehension for speed?
-    #band_pixels = sum(bands.values())
+    # normalize by dividing each value by the respective number of pixels to get [0,1]-space 
+    # values to allow accurate comparison of different-sized images
     bands = {k:v/band_pixels for (k,v) in bands.items()}
     perceived_brightness = perceived_brightness / len(pixels)
     
     return bands, perceived_brightness
 #end def
 
-#get the primary color band from a bands dictionary
+#get the primary color band from a bands dictionary to use for the hue partition
 def get_primary_band(bands:dict)->int:
     """
     Get the primary band from a bands dictionary
@@ -144,32 +152,17 @@ def get_primary_band(bands:dict)->int:
     return max(bands, key=bands.get) # I THINK I grok this one
  
 
-
-# def sort_and_render_images(df:pd.DataFrame, hue_column: str, lightness_column:str)-> pd.DataFrame:
-#     """
-#     Sort the the dataframe by the chosen hue partition and lightness column then render the images
-#     """
-#     ldf = df.copy().sort_values(by=[hue_column, lightness_column])
-
-#     #define the html div template
-#     div_template = '<img title="prime:{prime_color}, vivid:{vivid_color}, part:{vivid_hue_part}, lum:{prime_lum}, pb:{prime_pb}" src="{image_fqp}" />'
-#     # apply the template to each row, return the results as a series, then concatenate the series to a string
-#     divs = ldf.apply(div_template.format_map, axis=1, result_type='reduce').str.cat(sep='\n')
-#     return divs
-# #end def
-
-
-# %% Test
-
-image_path = 'test_covers/'
-image_list = os.listdir(image_path)
-
-image = Image.open(image_path + image_list[0])
-
-bands, pb = get_image_rainbow_bands_and_perceived_brightness(image, 30)
-print (bands, pb)
-print(sum(bands.values()))
-print(max(bands, key=bands.get))
+def render_images(df:pd.DataFrame)->str:
+    """
+    Render the images from the dataframe
+    """
+    
+    #define the html div template
+    div_template = '<img title="band: {band}, pb: {pb}" src="{image_fqp}" />'
+    # apply the template to each row, return the results as a series, then concatenate the series to a string
+    divs = df.apply(div_template.format_map, axis=1, result_type='reduce').str.cat(sep='\n')
+    return divs
+#end def
 
 # %%
 
@@ -187,109 +180,30 @@ band_deg = 30
 # for each image, filter out the vivid pixels and extract the hue band for each
 # then get the hue and perceived lightness of each colors
 # and add to the dataframe
-for img in image_list:
-
-    image = Image.open(image_path + image)
+for image_file in image_list:
+    image_fqp = image_path + image_file
+    image = Image.open(image_fqp)
     bands, pb = get_image_rainbow_bands_and_perceived_brightness(image, band_deg)
-
-
-
-
-    #get the image file object
-    image_fqp = image_path + image
-    prime_color, vivid_color = get_dominant_colors(image_fqp)
-    prime_hue, prime_lum, prime_pb = rgb_to_hue_luminance_brightness(prime_color)
-    vivid_hue, vivid_lum, vivid_pb = rgb_to_hue_luminance_brightness(vivid_color)
-    row = [image_fqp, 
-        prime_color, prime_hue, prime_lum, prime_pb, 
-        vivid_color, vivid_hue, vivid_lum, vivid_pb]
+    primary_band = get_primary_band(bands)
+    row = [image_fqp, primary_band, pb]
     append_row(df, row)
+# end for
 
-# The color wheel is centered on red at 0 degrees, but some of the colors near 360 
-# are also closer to red than violet, so shift the hue to capture these as 'red'
-hue_shift = 30
-# partition the hue into 360/partition_degrees bands
-partition_degrees = 60
-# get the hue partition for both the prime and vivid colors
-df['prime_hue_part'] = ((df['prime_hue'] + hue_shift) % 360) // partition_degrees
-df['vivid_hue_part'] = ((df['vivid_hue'] + hue_shift) % 360) // partition_degrees
-
+#sort the dataframe by the hue band and perceived brightness
+df = df.sort_values(by=['band', 'pb'])
 
 # %%
-# generate the HTML table
+# generate the HTML
+
+#define the html div template
+div_template = '<img title="band: {band}, pb: {pb}" src="{image_fqp}" />'
+# apply the template to each row, return the results as a series, then concatenate the series to a string
+divs = df.apply(div_template.format_map, axis=1, result_type='reduce').str.cat(sep='\n')
+
 ht = \
-f'''<style>img {{max-height: 50px; display:block;}}</style>
-<table>
-    <tr><th>Vivid/Lum</th><th>Vivid/PB</th>
-        <th>Viv hue/Prim Lum</th><th>Viv hue/Prim PB</th></tr>
-    <tr>
-        <td>{sort_and_render_images(df, "vivid_color", "vivid_hue_part", "vivid_lum")}</td>
-        <td>{sort_and_render_images(df, "vivid_color", "vivid_hue_part", "vivid_pb")}</td>
-        <td>{sort_and_render_images(df, "vivid_color", "vivid_hue_part", "prime_lum")}</td>
-        <td>{sort_and_render_images(df, "vivid_color", "vivid_hue_part", "prime_pb")}</td>
-    </tr>
-</table>'''
-
-print(ht)
-
-#display(HTML(ht))
-#<th>Prime/Lum</th><th>Prime/PB</th>
-#        <td>{sort_and_render_images(df, "prime_color", "prime_hue", "prime_lum")}</td>
-#        <td>{sort_and_render_images(df, "prime_color", "prime_hue", "prime_pb")}</td>
-
-
-# %%
-
-# the images are in "../Lottie_Playlist/test_covers/"
-# get a list of the available images
-#image_path = '/Users/austegard/Projects/Lottie_Playlist/test_covers/'
-image_path = 'test_covers/'
-image_list = os.listdir(image_path)
-
-df = pd.DataFrame(
-    columns=['image_fqp', 
-        'prime_color', 'prime_hue', 'prime_lum', 'prime_pb', 
-        'vivid_color', 'vivid_hue', 'vivid_lum', 'vivid_pb'])
-
-# for each image, extract the top color as well as the top "vivid" color 
-# then get the hue and perceived lightness of each colors
-# and add to the dataframe
-for image in image_list:
-    #get the image file object
-    image_fqp = image_path + image
-    prime_color, vivid_color = get_dominant_colors(image_fqp)
-    prime_hue, prime_lum, prime_pb = rgb_to_hue_luminance_brightness(prime_color)
-    vivid_hue, vivid_lum, vivid_pb = rgb_to_hue_luminance_brightness(vivid_color)
-    row = [image_fqp, 
-        prime_color, prime_hue, prime_lum, prime_pb, 
-        vivid_color, vivid_hue, vivid_lum, vivid_pb]
-    append_row(df, row)
-
-# The color wheel is centered on red at 0 degrees, but some of the colors near 360 
-# are also closer to red than violet, so shift the hue to capture these as 'red'
-hue_shift = 30
-# partition the hue into 360/partition_degrees bands
-partition_degrees = 60
-# get the hue partition for both the prime and vivid colors
-df['prime_hue_part'] = ((df['prime_hue'] + hue_shift) % 360) // partition_degrees
-df['vivid_hue_part'] = ((df['vivid_hue'] + hue_shift) % 360) // partition_degrees
-
-
-# %%
-# generate the HTML table
-ht = \
-f'''<style>img {{max-height: 50px; display:block;}}</style>
-<table>
-    <tr><th>Vivid/Lum</th><th>Vivid/PB</th>
-        <th>Viv hue/Prim Lum</th><th>Viv hue/Prim PB</th></tr>
-    <tr>
-        <td>{sort_and_render_images(df, "vivid_color", "vivid_hue_part", "vivid_lum")}</td>
-        <td>{sort_and_render_images(df, "vivid_color", "vivid_hue_part", "vivid_pb")}</td>
-        <td>{sort_and_render_images(df, "vivid_color", "vivid_hue_part", "prime_lum")}</td>
-        <td>{sort_and_render_images(df, "vivid_color", "vivid_hue_part", "prime_pb")}</td>
-    </tr>
-</table>'''
-
+'''<style>img {width: 200px; display:block;}</style>
+<h2>Arrange by Primary Vivid Hue Band, then Sort by Perceived Brightness</h2>
+''' + divs
 
 # output the HTML to a file
 with open('sorted_albums_test.html', 'w') as f:
@@ -297,6 +211,5 @@ with open('sorted_albums_test.html', 'w') as f:
 #end with
 # open the file in the browser
 webbrowser.open('file://' + os.path.realpath('sorted_albums_test.html'))
-
 
 # %%
