@@ -25,3 +25,7 @@
 
 ### Things to figure out/do
 See [Project Kanban Board](https://github.com/users/oaustegard/projects/2)
+
+## Results(!)
+
+See [Color Sorting](https://colab.research.google.com/drive/1s1hMtukMIRjDmGApmSHvUSr_rnbC2tA7#scrollTo=Ehy6s_Z_8CXz) and [🌈 Playlist](https://colab.research.google.com/drive/1gXRzjjXaY0-zDXoggZs49jmIIxr9NLAX?usp=sharing#scrollTo=nZwzuKawZqw8) Colab Notebooks
