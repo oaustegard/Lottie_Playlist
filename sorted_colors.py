@@ -51,12 +51,12 @@ display(HTML(html))
 
 # %%
 display(HTML('''
-    <div style="background-color:hsl(0, 100%, 50%)">Red</div>
-    <div style="background-color:hsl(60, 100%, 50%">Yellow</div>
-    <div style="background-color:hsl(120, 100%, 50%">Green</div>
-    <div style="background-color:hsl(180, 100%, 50%">Cyan</div>
-    <div style="background-color:hsl(240, 100%, 50%">Blue</div>
-    <div style="background-color:hsl(300, 100%, 50%">Magenta</div>
+    <div style="background-color:hsl(0, 100%, 50%); color:#fff">Red</div>
+    <div style="background-color:hsl(60, 100%, 50%; color:#fff">Yellow</div>
+    <div style="background-color:hsl(120, 100%, 50%; color:#fff">Green</div>
+    <div style="background-color:hsl(180, 100%, 50%; color:#fff">Cyan</div>
+    <div style="background-color:hsl(240, 100%, 50%; color:#fff">Blue</div>
+    <div style="background-color:hsl(300, 100%, 50%; color:#fff">Magenta</div>
 '''))
 
 # %% [markdown]
@@ -136,9 +136,10 @@ display(HTML('''
 '''))
 
 # %% [markdown]
-# There's been a [_lot_ of research in this area](https://culorijs.org/color-spaces/) and several formulae have been arrived at for calculating the 
-# lightness of a color, as perceived by humans. None of them are perfect, so let's empirically compare a few of them by 
-# trying each.
+# There's been a _lot_ of research in this area and in the past 100 years 
+# [several formulae](https://en.wikipedia.org/wiki/Lightness#Relationship_to_value_and_relative_luminance) have been 
+# derived iteratively to improve the calculation of lightness of a color, as perceived by humans. Most of these, 
+# frankly, go over my head, but let's take a look at some of them and figure out which works best in our case.
 # 
 # But first, that lambda for sorting is getting out of hand, and the html is getting complex, let's clean up 
 # the code, and why not -- use Pandas for the data structure:
@@ -272,3 +273,6 @@ display(HTML(ht))
 # The "out of the box" lightness value of HSL works moderately better, but the luminance and perceived lightness 
 # of the HSP formula are the best, with HSP's "perceived lightness" eeking out a win. Luminance has the benefit 
 # of being an accepted standard thoug
+
+
+🤷🏻‍♂️
