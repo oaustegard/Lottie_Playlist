@@ -140,4 +140,45 @@ def get_primary_band(bands:dict)->int:
     :return: the primary band
     """
     return max(bands, key=bands.get) # I THINK I grok this one
- 
+
+
+def get_perceived_color(image:Image, max_pixels:int=10000)->Tuple[float, float, float]:
+    """
+    Compute a single 'perceived color' for an image as the perceived-brightness-
+    weighted average of all its pixels, optionally downsampling first.
+
+    Complements get_image_rainbow_bands_and_perceived_brightness, which buckets
+    pixels into rainbow bands and discards non-vivid ones whenever any vivid
+    pixels exist. This function uses the totality of the image — every pixel
+    contributes, weighted by its HSP perceived brightness, so visually bright
+    regions dominate the resulting color the way a human eye reads an image.
+
+    Addresses the sampling TODO in get_image_rainbow_bands_and_perceived_brightness
+    by using PIL's thumbnail to cap pixel count before iteration.
+
+    :param image: PIL Image
+    :param max_pixels: if the image has more pixels than this, it is
+        downsampled to roughly this size (aspect ratio preserved) before
+        the per-pixel pass. Set to 0 to disable downsampling.
+    :return: RGB tuple in [0, 1]-space. (0, 0, 0) for a fully-black image.
+    """
+    img = image.convert('RGB')
+    if max_pixels and img.size[0] * img.size[1] > max_pixels:
+        # thumbnail() mutates in place; copy so we don't surprise the caller.
+        side = int(max_pixels ** 0.5)
+        img = img.copy()
+        img.thumbnail((side, side))
+
+    r_sum = g_sum = b_sum = 0.0
+    total_weight = 0.0
+    for pixel in img.getdata():
+        r, g, b = normalize_color(pixel)
+        p = (0.299 * r * r + 0.587 * g * g + 0.114 * b * b) ** 0.5
+        r_sum += r * p
+        g_sum += g * p
+        b_sum += b * p
+        total_weight += p
+
+    if total_weight == 0:
+        return 0.0, 0.0, 0.0
+    return r_sum / total_weight, g_sum / total_weight, b_sum / total_weight
