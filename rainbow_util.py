@@ -31,8 +31,13 @@ def rgb_to_hsp(rgb:tuple)->Tuple[int, float, float]:
     sumc = (maxc+minc)
     rangec = (maxc-minc)
     l = sumc/2.0
+    # Perceived brightness is independent of hue/saturation, so compute it up front; the
+    # old early-return reported p=0 for every achromatic pixel, zeroing out greyscale
+    # covers' brightness (#21/#22).
+    p = (0.299 * r * r + 0.587 * g * g + 0.114 * b * b)**0.5
     if minc == maxc:
-        return 0.0, l, 0.0
+        # achromatic pixel: no hue, zero saturation, but its real perceived brightness
+        return 0.0, 0.0, p
     if l <= 0.5:
         s = rangec / sumc
     else:
@@ -48,8 +53,6 @@ def rgb_to_hsp(rgb:tuple)->Tuple[int, float, float]:
         h = 4.0+gc-rc
     h = int((h/6.0) % 1.0 * 360.0) # I don't quite grok the %1.0 part, but it seems to work
 
-    p = (0.299 * r * r + 0.587 * g * g + 0.114 * b * b)**0.5
-    
     return h, s, p
 #end def
 
