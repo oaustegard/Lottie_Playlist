@@ -2,12 +2,12 @@
 
 > "Could you find a way to sort my Spotify playlist by the color of the album cover, like a rainbow?" — Lottie
 
-A one-question favour that turned into a small exercise in colour science: take a
+A one-question favor that turned into a small exercise in color science: take a
 Spotify playlist, look at every track's album cover, and re-order the songs so the
 covers run through the spectrum like a rainbow — reds, oranges, yellows, greens,
-blues, violets — with the greyscale covers gathered into their own gradient.
+blues, violets — with the grayscale covers gathered into their own gradient.
 
-The working artefact is the [`🌈_Playlist.ipynb`](./🌈_Playlist.ipynb) notebook
+The working artifact is the [`🌈_Playlist.ipynb`](./🌈_Playlist.ipynb) notebook
 (open it in Colab — link below). The loose `*.py` files are the exploratory
 scratch work that fed into it.
 
@@ -18,19 +18,19 @@ scratch work that fed into it.
 2. **Pull the tracks**, paging through the full source, keeping each track's id,
    track number, and album-cover URL.
 3. **Read each cover.** The cover is downsized to 10×10 px — we want the *gist* of
-   the colour, not the detail — and every pixel is converted to hue, saturation and
+   the color, not the detail — and every pixel is converted to hue, saturation and
    perceived luminance.
 4. **Classify the cover.** Pixels are bucketed into 30°-wide hue *bands* around the
-   colour wheel (shifted 30° so the trailing reds rejoin the leading reds). Only
+   color wheel (shifted 30° so the trailing reds rejoin the leading reds). Only
    *vivid* pixels vote, so a logo on a busy cover doesn't hijack the result. A
-   cover whose pixels are mostly greyscale (fewer than 10% vivid) is sent to a
-   dedicated **grey band** instead of being assigned a meaningless hue.
-5. **Sort** by `(band, perceived luminance, track number)`: greys first as a
+   cover whose pixels are mostly grayscale (fewer than 10% vivid) is sent to a
+   dedicated **gray band** instead of being assigned a meaningless hue.
+5. **Sort** by `(band, perceived luminance, track number)`: grays first as a
    black→white run, then each hue band light-to-dark, with same-album tracks held
    in album order.
 6. **Write** the result back as a new Spotify playlist and hand back a link.
 
-### The colour bits
+### The color bits
 
 - **Hue / saturation** come from the standard HSL conversion.
 - **Perceived luminance** uses the [relative-luminance](https://en.wikipedia.org/wiki/Relative_luminance)
@@ -56,7 +56,7 @@ launch it straight in Colab:
 
 ## Status & ideas
 
-The core pipeline — auth → fetch → colour-extract → rainbow-sort → create playlist —
-works end to end. Remaining ideas live in the issues: parallelising the cover
-downloads (#25) and a better whole-image "perceived colour" than the dominant band
+The core pipeline — auth → fetch → color-extract → rainbow-sort → create playlist —
+works end to end. Remaining ideas live in the issues: parallelizing the cover
+downloads (#25) and a better whole-image "perceived color" than the dominant band
 (open-ended). See also the [project board](https://github.com/users/oaustegard/projects/2).
