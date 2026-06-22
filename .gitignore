@@ -1,4 +1,14 @@
-spotify_test.py
-__pycache__/color_utility.cpython-310.pyc
-dedupe.py
+# Secrets & local credentials — never commit
 creds.py
+.cache
+.cache*
+*.env
+
+# Python / OS cruft
+__pycache__/
+*.pyc
+.DS_Store
+
+# Scratch
+spotify_test.py
+dedupe.py
